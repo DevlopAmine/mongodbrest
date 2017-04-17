@@ -45,10 +45,7 @@ public class ToDBController {
 	@Autowired
 	  private AlertService alertServ;
 	
-	
-
-	  
-	  /**
+  /**
 	   * Create Instance 
 	 * @param InstanceMap
 	 * @return Map<String,Object>
@@ -64,7 +61,7 @@ public class ToDBController {
 	   @RequestMapping(method = RequestMethod.GET,value="twlist")
 	  public ResponseEntity<Alert> insertFromListSN(){
 		
-		  Alert alert = new Alert(new ObjectId(),"messi");
+		  Alert alert = new Alert(new ObjectId(),"surf");
 		  alertServ.saveTwAlert(alert);
 	
 	 	return new ResponseEntity<Alert>(alert, HttpStatus.CREATED);
@@ -94,15 +91,42 @@ public class ToDBController {
 	 @RequestMapping(method = RequestMethod.GET,value="fbList")
 	  public ResponseEntity<Alert> insertFromFBList(){
 		
-		 Alert a1 = new Alert(new ObjectId(),"Visit Morocco1");
+		 Alert a1 = new Alert(new ObjectId(),"Visit Morocco2");
 	     alertServ.saveFBAlert(a1);
 	     
 	     return new ResponseEntity<Alert>(a1, HttpStatus.CREATED);
 	  
 	  }
 	  
-	 
+	 /*
+	  *  get Posts from Google custom search and store them to MongoDB
+	  * 
+	  */
+	 @RequestMapping(method = RequestMethod.GET,value="cseList")
+	  public ResponseEntity<Alert> insertCSEList(){
+		
+		 Alert a1 = new Alert(new ObjectId(),"Spain alert");
+	     alertServ.saveGgAlert(a1);
+	     
+	     return new ResponseEntity<Alert>(a1, HttpStatus.CREATED);
+	  
+	  }
 	
+	 @RequestMapping(method = RequestMethod.GET,value="t")
+	  public void tstB(){
+		
+		 System.out.println(alertServ.issetAlert("Visit Morocco2"));
+	     
+	    // return new ResponseEntity<Alert>(a1, HttpStatus.CREATED);
+	  
+	  }
+	 
+	 @RequestMapping(method = RequestMethod.DELETE,value="delInst/{InstId}")
+	  public ResponseEntity<String> dropAlerts(@PathVariable("InstId") String InstId){  
+		instServ.removeInstance(new ObjectId(InstId));
+			    
+	    return new ResponseEntity<String>("Alerts deleted successfully", HttpStatus.NO_CONTENT);
+	  }
 }
 
 

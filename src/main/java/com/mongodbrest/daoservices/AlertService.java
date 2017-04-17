@@ -12,4 +12,6 @@ public interface AlertService {
 	void deleteAlert(String alertId);
 	List<Alert> findAlertsByInstanceId(ObjectId oId);
 	void saveFBAlert(Alert alert);
+	void saveGgAlert(Alert alert);
+	boolean issetAlert(String desc);
 }
