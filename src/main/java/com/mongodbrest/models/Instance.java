@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.mongodbrest.repositories.CascadeSave;
 
@@ -17,6 +18,9 @@ public class Instance {
 	
 	private Double instance_id;
 	private String descI;
+	
+	@Field(value="customer_id")
+	private ObjectId customer_id;
 	
 /*	@DBRef
 	@CascadeSave
@@ -75,9 +79,17 @@ public class Instance {
 		this.alert = alert;
 	}*/
 
+	public ObjectId getCustomer_id() {
+		return customer_id;
+	}
+
+	public void setCustomer_id(ObjectId customer_id) {
+		this.customer_id = customer_id;
+	}
+
 	@Override
 	public String toString() {
-		return "Instance [id=" + id + ", instance_id=" + instance_id + ", descI=" + descI + "]";
+		return "Instance [id=" + id + ", customer_id=" + customer_id + ", descI=" + descI + "]";
 	}
 	
 	

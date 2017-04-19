@@ -1,5 +1,7 @@
 package com.mongodbrest.controllers;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,9 +29,11 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.mongodbrest.daoservices.AlertService;
+import com.mongodbrest.daoservices.CustomerService;
 import com.mongodbrest.daoservices.InstanceService;
 import com.mongodbrest.models.*;
-import com.mongodbrest.repositories.*; 
+import com.mongodbrest.repositories.*;
+ 
 
 /**
  * @author amine
@@ -44,25 +49,32 @@ public class ToDBController {
 	  private InstanceService instServ;
 	@Autowired
 	  private AlertService alertServ;
-	
+	@Autowired
+	  private CustomerService customServ;
   /**
 	   * Create Instance 
 	 * @param InstanceMap
 	 * @return Map<String,Object>
 	 */
-	@RequestMapping(method = RequestMethod.POST)
+	  @RequestMapping(method = RequestMethod.POST)
 	  public void createInstance(@RequestBody Map<String, Object> InstanceMap){
 	    
-		Instance instance = new Instance(Double.parseDouble(InstanceMap.get("instance_id").toString()),InstanceMap.get("descI").toString());
-		instServ.saveInstance(instance);
+		instServ.saveInstance(InstanceMap);
+		
+	  }
+	
+	@RequestMapping(method = RequestMethod.POST,value="newcustom")
+	  public void createCustomer(@RequestBody HashMap<String, Object> CustomMap){
+		
+		 customServ.createCustomer(CustomMap);
 		
 	  }
 	  
-	   @RequestMapping(method = RequestMethod.GET,value="twlist")
-	  public ResponseEntity<Alert> insertFromListSN(){
+	  @RequestMapping(method = RequestMethod.GET,value="twlist/{descI}")
+	  public ResponseEntity<Alert> insertFromListSN(@PathVariable("descI") String descI){
 		
 		  Alert alert = new Alert(new ObjectId(),"surf");
-		  alertServ.saveTwAlert(alert);
+		  alertServ.saveTwAlert(alert,descI);
 	
 	 	return new ResponseEntity<Alert>(alert, HttpStatus.CREATED);
 	  }
@@ -88,11 +100,11 @@ public class ToDBController {
 	  *  get Posts from FB and store them to MongoDB
 	  * 
 	  */
-	 @RequestMapping(method = RequestMethod.GET,value="fbList")
-	  public ResponseEntity<Alert> insertFromFBList(){
+	 @RequestMapping(method = RequestMethod.GET,value="fbList/{descI}")
+	  public ResponseEntity<Alert> insertFromFBList(@PathVariable("descI") String descI){
 		
 		 Alert a1 = new Alert(new ObjectId(),"Visit Morocco2");
-	     alertServ.saveFBAlert(a1);
+	     alertServ.saveFBAlert(a1,descI);
 	     
 	     return new ResponseEntity<Alert>(a1, HttpStatus.CREATED);
 	  
@@ -102,11 +114,12 @@ public class ToDBController {
 	  *  get Posts from Google custom search and store them to MongoDB
 	  * 
 	  */
-	 @RequestMapping(method = RequestMethod.GET,value="cseList")
-	  public ResponseEntity<Alert> insertCSEList(){
+	 @RequestMapping(method = RequestMethod.GET,value="cseList/{descI}")
+	  public ResponseEntity<Alert> insertCSEList(@PathVariable("descI") String descI){
 		
 		 Alert a1 = new Alert(new ObjectId(),"Spain alert");
-	     alertServ.saveGgAlert(a1);
+		 
+	     alertServ.saveGgAlert(a1,descI);
 	     
 	     return new ResponseEntity<Alert>(a1, HttpStatus.CREATED);
 	  
@@ -126,6 +139,31 @@ public class ToDBController {
 		instServ.removeInstance(new ObjectId(InstId));
 			    
 	    return new ResponseEntity<String>("Alerts deleted successfully", HttpStatus.NO_CONTENT);
+	  }
+	 
+	 @RequestMapping(method = RequestMethod.GET,value="ta")
+		public void tstA(){
+			String descA="Visit Morocco2";
+			//alertServ.findAlertId(descA);
+		   
+		  // return new ResponseEntity<Alert>(a1, HttpStatus.CREATED);
+		
+		}
+	 
+	 @RequestMapping(method = RequestMethod.GET,value="instances/{CostId}",produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody ResponseEntity<List<Instance>> ShowInstancesByCostumer(@PathVariable("CostId") String CostId ){  
+		
+		 List<Instance> instances = instServ.findInstancesByCustomerId(new ObjectId(CostId));
+		
+		return new ResponseEntity<List<Instance>>(instances, HttpStatus.OK);
+	  }
+	 
+	 @RequestMapping(method = RequestMethod.GET,value="users/{desc}",produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody ResponseEntity<List<User>> ShowUsersByCostumer(@PathVariable("desc") String desc ){  
+		
+		 List<User> users = customServ.findUsersByCustomer(desc);
+		System.out.println(users.toString());
+		return new ResponseEntity<List<User>>(users, HttpStatus.OK);
 	  }
 }
 

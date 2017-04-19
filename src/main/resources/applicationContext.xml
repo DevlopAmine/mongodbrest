@@ -9,8 +9,8 @@
 	
     <bean class="com.mongodbrest.CascadingMongoEventListener"/>
     <bean class="com.mongodbrest.daoservices.InstanceServiceImpl"/>
-     <bean class="com.mongodbrest.daoservices.AlertServiceImpl"/>
-   
+    <bean class="com.mongodbrest.daoservices.AlertServiceImpl"/>
+    <bean class="com.mongodbrest.daoservices.CustomerServiceImpl"/>
 
 	<!-- Activate annotation configured components -->
 	<context:annotation-config />

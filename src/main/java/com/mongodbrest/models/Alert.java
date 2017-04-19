@@ -19,9 +19,8 @@ public class Alert {
 	
 	private String descA;
 	
-	@Field(value="instance")
-	@DBRef
-	private Instance instance;
+	@Field(value="instanceId")
+	private ObjectId instanceId;
 	
 	private List<AlertSource> alertsources;
 	
@@ -34,12 +33,15 @@ public class Alert {
 	}
 
 	
-	public Instance getInstance() {
-		return instance;
+	
+	public ObjectId getInstanceId() {
+		return instanceId;
 	}
-	public void setInstance(Instance instance) {
-		this.instance = instance;
+
+	public void setInstanceId(ObjectId instanceId) {
+		this.instanceId = instanceId;
 	}
+
 	public ObjectId getId() {
 		return id;
 	}
@@ -66,8 +68,9 @@ public class Alert {
 
 	@Override
 	public String toString() {
-		return "Alert [id=" + id+ ", descA=" + descA + "]";
+		return "Alert [id=" + id + ", descA=" + descA + ", instanceId=" + instanceId + "]";
 	}
+
 	
 	
 	

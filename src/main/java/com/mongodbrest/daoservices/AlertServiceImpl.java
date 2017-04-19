@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,14 +26,20 @@ import com.mongodbrest.models.Instance;
 import com.mongodbrest.models.SNresult;
 import com.mongodbrest.repositories.AlertRepository;
 
+/**
+ * @author amine
+ *
+ */
 public class AlertServiceImpl implements AlertService {
 
 	@Autowired 
 	private AlertRepository alertRepo;
 	@Autowired 
 	MongoTemplate mongoTemplate;
+	@Autowired
+	private InstanceService InstServ;
 	@Override
-	public void saveTwAlert(Alert alert) {
+	public void saveTwAlert(Alert alert,String descI) {
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<List<SNresult>> twResponse =
 			        restTemplate.exchange("http://localhost:8080/svc/v1/tweets/surfing",
@@ -45,44 +52,13 @@ public class AlertServiceImpl implements AlertService {
 				
 				 list.add(new AlertSource(sNresult.getIdR(),sNresult.getText(),sNresult.getUrl()));
 			}
-			if(issetAlert(alert.getDescA()))
-			{
-				Update update = new Update();
-				update.pushAll("alertsources", list.toArray());
-				mongoTemplate.updateFirst(query(where("descA").is(alert.getDescA())), update, Alert.class);
-			}
-		 
-			else
-			{
-				  Instance i = new Instance();
-				  i.setId(new ObjectId("58e7c8fe3b87f01dacf5fed6"));
-				  alert.setInstance(i);
-				  alert.setAlertsources(list);
-				  alertRepo.save(alert);
-			}
+			persistAlert(alert, list,descI);
 			
 	    
 		
 	}
-
-	@Override
-	public void deleteAlert(String alertId) {
-		alertRepo.delete(alertId);
-		
-	}
-
-	@Override
-	public List<Alert> findAlertsByInstanceId(ObjectId oId) {
-		List<Alert> listA =  mongoTemplate.find(query(where("instance.$id").is(oId)),Alert.class);
-		for (Alert a : listA) {
-			System.out.println(a.getDescA() +"  "+a.getId());
-			
-		}
-		return listA;
-	}
-
-	@Override
-	public void saveFBAlert(Alert alert) {
+@Override
+	public void saveFBAlert(Alert alert,String descI) {
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<List<SNresult>> FbResponse =
 			        restTemplate.exchange("http://localhost:8080/svc/v1/fb/lower",
@@ -96,25 +72,12 @@ public class AlertServiceImpl implements AlertService {
 				
 				 list.add(new AlertSource(sNresult.getIdR(),sNresult.getText(),sNresult.getUrl()));
 			}
-			if(issetAlert(alert.getDescA()))
-			{
-				Update update = new Update();
-				update.pushAll("alertsources", list.toArray());
-				mongoTemplate.updateFirst(query(where("descA").is(alert.getDescA())), update, Alert.class);
-			}
-			else
-			{
-				 Instance i = new Instance();
-			     i.setId(new ObjectId("58eca4a13aefb10b44edfd25"));
-			     alert.setInstance(i);
-				 alert.setAlertsources(list);
-			     alertRepo.save(alert);
-			}
+			persistAlert(alert, list,descI);
 		
 	}
 
 	@Override
-	public void saveGgAlert(Alert alert) {
+	public void saveGgAlert(Alert alert,String descI) {
 		RestTemplate restTemplate = new RestTemplate();
 		  ResponseEntity<List<SNresult>> GgResponse =
 			        restTemplate.exchange("http://localhost:8080/customse/data",
@@ -129,19 +92,24 @@ public class AlertServiceImpl implements AlertService {
 				
 				 list.add(new AlertSource(sNresult.getIdR(),sNresult.getText(),sNresult.getUrl()));
 			}
-			if(issetAlert(alert.getDescA()))
-			{
-				Update update = new Update();
-				update.pushAll("alertsources", list.toArray());
-				mongoTemplate.updateFirst(query(where("descA").is(alert.getDescA())), update, Alert.class);
-			}
-	      
-	      Instance i = new Instance();
-		  i.setId(new ObjectId("58eca4a13aefb10b44edfd25"));
-		  alert.setInstance(i);
-		  alert.setAlertsources(list);
-		  alertRepo.save(alert);
+			persistAlert(alert, list,descI);
 		
+	}
+	
+	@Override
+	public void deleteAlert(String alertId) {
+		alertRepo.delete(alertId);
+		
+	}
+
+	@Override
+	public List<Alert> findAlertsByInstanceId(ObjectId oId) {
+		List<Alert> listA =  mongoTemplate.find(query(where("instanceId").is(oId)),Alert.class);
+		for (Alert a : listA) {
+			System.out.println(a.getDescA() +"  "+a.getId());
+			
+		}
+		return listA;
 	}
 	
 	@Override
@@ -157,7 +125,39 @@ public class AlertServiceImpl implements AlertService {
 		
 		else return false;
 	}
-
+	
+	
+	public void persistAlert(Alert alert,List<AlertSource> list,String descI)
+	{
+		if(issetAlert(alert.getDescA()))
+		{
+			Update update = new Update();
+			update.pushAll("alertsources", list.toArray());
+			mongoTemplate.updateFirst(query(where("descA").is(alert.getDescA())), update, Alert.class);
+		}
+	 
+		else
+		{
+			
+			  alert.setInstanceId(InstServ.findInstanceId(descI));
+			  alert.setAlertsources(list);
+			  alertRepo.save(alert);
+		}
+		
+	}
+	
+	/* (non-Javadoc)
+	 * Permet de recuperer l'Id de l'instance lié à la description de l'Alert désigné
+	 
+	@Override
+	public ObjectId  findAlertId(String descA) {
+		
+		 Alert alert = mongoTemplate.findOne(query(where("descA").is(descA)),Alert.class,"alert");
+		 System.err.println(alert.getInstance().getId());
+		 return alert.getInstance().getId();
+		
+	}
+*/
 	
 	
 }
